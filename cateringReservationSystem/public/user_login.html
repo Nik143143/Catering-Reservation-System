@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <link rel="stylesheet" href="user_login.css">
+</head>
+
+<body>
+    <h2>User Login</h2>
+    <form id="loginForm">
+        <div class="container">
+            <div class="form-container">
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" required><br>
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" name="password" required><br>
+                <button type="submit" id="submit">Login</button>
+            </div>
+        </div>
+    </form>
+
+    <script src="https://www.gstatic.com/firebasejs/9.3.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.3.0/firebase-auth.js"></script>
+    <script src="firebase-config.js"></script>
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_uV1zDWYTE3FefNsWo91zbvrZCy4NuNY",
+            authDomain: "catering-reservation-sys-7277d.firebaseapp.com",
+            databaseURL: "https://catering-reservation-sys-7277d-default-rtdb.firebaseio.com",
+            projectId: "catering-reservation-sys-7277d",
+            storageBucket: "catering-reservation-sys-7277d.firebasestorage.app",
+            messagingSenderId: "346235707821",
+            appId: "1:346235707821:web:5b2a479fc718434a334124",
+            measurementId: "G-7PGLTHT9SG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // login.js
+
+        submit.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+
+                    // Check if the user exists in the database
+                    return get(child(ref(db), `users/${user.uid}`));
+                })
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        // Redirect to logged in page
+                        window.location.href = "user_IF.html";
+                    } else {
+                        alert("User does not exist.");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Login error:", error.message);
+                    alert("Invalid email or password.");
+                });
+        });
+
+    </script>
+</body>
+
+</html>

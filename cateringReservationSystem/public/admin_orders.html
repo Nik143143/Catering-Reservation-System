@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Your products</title>
+    <link rel="stylesheet" href="admins_orders.css">
+</head>
+
+<body>
+    <table id="table">
+        <thead>
+            <tr>
+                <th>Food name</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
+
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js"></script>
+    <script type="module">
+
+        import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_uV1zDWYTE3FefNsWo91zbvrZCy4NuNY",
+            authDomain: "catering-reservation-sys-7277d.firebaseapp.com",
+            databaseURL: "https://catering-reservation-sys-7277d-default-rtdb.firebaseio.com",
+            projectId: "catering-reservation-sys-7277d",
+            storageBucket: "catering-reservation-sys-7277d.firebasestorage.app",
+            messagingSenderId: "346235707821",
+            appId: "1:346235707821:web:5b2a479fc718434a334124",
+            measurementId: "G-7PGLTHT9SG"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
+
+        const tableBody = document.getElementById('tbody');
+
+        // Function to delete a food item
+        function deleteFoodItem(adminId, foodId) {
+            const foodItemRef = ref(db, `food_items/${adminId}/${foodId}`);
+            set(foodItemRef, null)
+                .then(() => {
+                    console.log("Food item deleted successfully");
+
+                    const currentAdminId = adminId; // Use the provided adminId parameter
+                    fetchAndDisplayFoodItems(currentAdminId); // Refresh food items after deletion
+                })
+                .catch((error) => {
+                    console.error("Error deleting food item:", error);
+                });
+        }
+
+        // Function to create the delete button with event listener
+        function createDeleteButton(foodId) {
+            const button = document.createElement('button');
+            button.textContent = 'Delete';
+            button.className = 'delete-button';
+            button.dataset.foodid = foodId;
+            button.addEventListener('click', function () {
+                const user = auth.currentUser;
+                if (user) {
+                    const currentAdminId = user.uid;
+                    deleteFoodItem(currentAdminId, foodId);
+                } else {
+                    console.log('No user logged in');
+                }
+            });
+            return button;
+        }
+
+        // Function to render product data in the table
+        function renderProducts(data) {
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            data.forEach(product => {
+                const { foodName, price, description, imageURL, foodid } = product;
+                if (imageURL) {
+                    getDownloadURL(storageRef(storage, imageURL))
+                        .then((url) => {
+                            // Create table row
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                            <td>${foodName}</td>
+                            <td>${price}</td>
+                            <td>${description}</td>
+                            <td><img src="${url}" alt="${foodName}" width="100"></td>
+                            <td></td>
+                        `;
+                            // Create and append delete button
+                            const deleteButton = createDeleteButton(foodid);
+                            row.lastElementChild.appendChild(deleteButton);
+                            tableBody.appendChild(row);
+                        })
+                        .catch((error) => {
+                            console.error('Error getting download URL:', error);
+                        });
+                } else {
+                    console.error('Image field is undefined for product:', product);
+                }
+            });
+        }
+
+        // Listen for changes in the 'food_items' node and render the table
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const currentAdminId = user.uid;
+                    const productsRef = ref(db, 'food_items');
+
+                    onValue(productsRef, (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            const products = Object.values(data);
+                            renderProducts(products);
+                        } else {
+                            console.log('No products found.');
+                        }
+                    });
+                } else {
+                    console.log('No user logged in');
+                }
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        });
+    </script>
+</body>
+
+</html>

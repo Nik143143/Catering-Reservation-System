@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="user_profile.css">
+</head>
+
+<body>
+    <h1>User Profile</h1>
+    <div id="profileContainer"></div>
+
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getAnalytics, ref, child, get, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+        import { getDatabase, ref, child, get, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+        // Initialize Firebase
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_uV1zDWYTE3FefNsWo91zbvrZCy4NuNY",
+            authDomain: "catering-reservation-sys-7277d.firebaseapp.com",
+            databaseURL: "https://catering-reservation-sys-7277d-default-rtdb.firebaseio.com",
+            projectId: "catering-reservation-sys-7277d",
+            storageBucket: "catering-reservation-sys-7277d.firebasestorage.app",
+            messagingSenderId: "346235707821",
+            appId: "1:346235707821:web:5b2a479fc718434a334124",
+            measurementId: "G-7PGLTHT9SG"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const userId = user.uid;
+                const profileContainer = document.getElementById('profileContainer');
+
+                // Reference to the users node
+                const usersRef = ref(db, 'users');
+
+                // Listen for changes to the users node
+                onValue(usersRef, (snapshot) => {
+                    const users = snapshot.val();
+                    if (users) {
+                        Object.entries(users).forEach(([id, userData]) => {
+                            if (id === userId) {
+                                // If user ID matches, display profile information
+                                const { fullname, address, email, phonenumber } = userData;
+
+                                // Create profile HTML
+                                const profileHTML = `
+                                    <div class="profile">
+                                        <div><strong>Full Name:</strong> ${fullname}</div>
+                                        <div><strong>Address:</strong> ${address}</div>
+                                        <div><strong>Email:</strong> ${email}</div>
+                                        <div><strong>Phone Number:</strong> ${phonenumber}</div>
+                                    </div>
+                                `;
+
+                                // Append profile HTML to container
+                                profileContainer.innerHTML = profileHTML;
+                            }
+                        });
+                    }
+                });
+            } else {
+                // Handle case where user is not signed in
+                console.log("User not signed in.");
+            }
+        });
+    </script>
+</body>
+
+</html>

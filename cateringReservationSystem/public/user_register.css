@@ -1,0 +1,61 @@
+body {
+  font-family: Arial, sans-serif;
+  background: url(images/userRegistration.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  max-width: 400px;
+  box-sizing: border-box;
+  margin: 100px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 30px;
+  border: 1px solid #fff;
+  box-shadow: inset 0px 0px 30px 1px rgba(0, 0, 0, 0.5);
+}
+
+.container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="password"],
+button {
+  display: block;
+  width: 250px;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 30px;
+  box-shadow: inset 0px 0px 5px 1px rgba(0, 0, 0, 0.5);
+}
+
+button {
+  display: block;
+  justify-self: center;
+  background-color: #208b3a;
+  width: 150px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #25a244;
+}
